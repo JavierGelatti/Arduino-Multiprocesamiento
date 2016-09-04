@@ -1,0 +1,20 @@
+#include "catch.hpp"
+#include "../Hilo.h"
+
+SCENARIO("ejecución de código", "[multiprocesamiento]") {
+    GIVEN("un hilo") {
+        Hilo* elHilo = new Hilo();
+
+        WHEN("se ejecuta código sin condiciones de tiempo") {
+            bool ejecutado = false;
+            auto codigo = [&] () { ejecutado = true; };
+            elHilo->agregarCodigo(codigo);
+            
+            THEN("el código se ejecuta cuando ejecuta el hilo") {
+                REQUIRE(!ejecutado);
+                elHilo->ejecutar();
+                REQUIRE(ejecutado);
+            }
+        }
+    }
+}
