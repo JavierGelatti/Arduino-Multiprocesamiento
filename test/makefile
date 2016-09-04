@@ -1,7 +1,7 @@
 all: maketest clean
 
 maketest:
-	g++ tests.cpp -o runtests
+	g++ tests.cpp TestLista.cpp -o runtests
 	./runtests
 
 clean:

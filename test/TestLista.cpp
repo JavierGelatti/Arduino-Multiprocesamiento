@@ -1,0 +1,213 @@
+#include "catch.hpp"
+#include "../Lista.h"
+
+SCENARIO("creación de listas", "[lista]") {
+    GIVEN("ninguna precondición") {
+        WHEN("se crea una lista") {
+            Lista<char> l;
+            
+            THEN("esta vacía") {
+                REQUIRE(l.estaVacia());
+            }
+            THEN("el largo es cero") {
+                REQUIRE(l.largo() == 0);
+            }
+        }
+    }
+    GIVEN("una lista vacia") {
+        Lista<char> l;
+
+        WHEN("se agrega un elemento") {
+            l.agregar('a');
+            
+            THEN("la lista ya no está vacía") {
+                REQUIRE(!l.estaVacia());
+            }
+            THEN("el largo es uno") {
+                REQUIRE(l.largo() == 1);
+            }
+        }
+    }
+}
+
+SCENARIO("agregar y recuperar elementos", "[lista]") {
+    GIVEN("una lista con un elemento") {
+        Lista<char> l;
+        l.agregar('a');
+
+        WHEN("se recupera el primer elemento") {
+            int unElemento = l.primerElemento();
+            
+            THEN("es igual al elemento de la lista") {
+                REQUIRE(unElemento == 'a');
+            }
+        }
+        WHEN("se recupera el ultimo elemento") {
+            char unElemento = l.ultimoElemento();
+            
+            THEN("es igual al elemento de la lista") {
+                REQUIRE(unElemento == 'a');
+            }
+        }
+        WHEN("se agrega otro elemento") {
+            l.agregar('b');
+            
+            THEN("el primer elemento es el que ya estaba") {
+                REQUIRE(l.primerElemento() == 'a');
+            }
+            THEN("el ultimo elemento es el que se acaba de agregar") {
+                REQUIRE(l.ultimoElemento() == 'b');
+            }
+            THEN("el largo es dos") {
+                REQUIRE(l.largo() == 2);
+            }
+        }
+    }
+    GIVEN("una lista vacía") {
+        Lista<char> l;
+
+        WHEN("se agregan tres elementos") {
+            l.agregar('a');
+            l.agregar('b');
+            l.agregar('c');
+            
+            THEN("el primer elemento es el primero que se agregó") {
+                REQUIRE(l.primerElemento() == 'a');
+            }
+            THEN("el ultimo elemento es el ultimo que se agregó") {
+                REQUIRE(l.ultimoElemento() == 'c');
+            }
+            THEN("el largo es tres") {
+                REQUIRE(l.largo() == 3);
+            }
+        }
+    }
+    GIVEN("una lista con tres elementos") {
+        Lista<char> l;
+        l.agregar('a');
+        l.agregar('b');
+        l.agregar('c');
+
+        WHEN("se agrega un elemento al inicio") {
+            l.agregarAlInicio('z');
+            
+            THEN("el primer elemento es el que se agregó") {
+                REQUIRE(l.primerElemento() == 'z');
+            }
+            THEN("el ultimo elemento sigue siendo el mismo") {
+                REQUIRE(l.ultimoElemento() == 'c');
+            }
+            THEN("el largo es cuatro") {
+                REQUIRE(l.largo() == 4);
+            }
+        }
+    }
+    GIVEN("una lista vacía") {
+        Lista<char> l;
+
+        WHEN("se agrega un elemento al inicio") {
+            l.agregarAlInicio('a');
+            
+            THEN("el primer elemento es el que se agregó") {
+                REQUIRE(l.primerElemento() == 'a');
+            }
+            THEN("el ultimo elemento es el que se agregó") {
+                REQUIRE(l.ultimoElemento() == 'a');
+            }
+            THEN("el largo es uno") {
+                REQUIRE(l.largo() == 1);
+            }
+        }
+        WHEN("se agrega un elemento al final") {
+            l.agregarAlFinal('a');
+            
+            THEN("tiene el mismo efecto que agregarlo normalmente") {
+                REQUIRE(l.primerElemento() == 'a');
+                REQUIRE(l.ultimoElemento() == 'a');
+                REQUIRE(l.largo() == 1);
+            }
+        }
+    }
+    GIVEN("una lista con un elemento") {
+        Lista<char> l;
+        l.agregar('a');
+
+        WHEN("se agrega un elemento al final") {
+            l.agregarAlFinal('b');
+            
+            THEN("tiene el mismo efecto que agregarlo normalmente") {
+                REQUIRE(l.primerElemento() == 'a');
+                REQUIRE(l.ultimoElemento() == 'b');
+                REQUIRE(l.largo() == 2);
+            }
+        }
+    }
+}
+
+SCENARIO("eliminar elementos", "[lista]") {
+    GIVEN("una lista con tres elementos") {
+        Lista<char> l;
+        l.agregar('a');
+        l.agregar('b');
+        l.agregar('c');
+
+        WHEN("se elimina el primer elemento") {
+            l.eliminarPrimero();
+            
+            THEN("el primer elemento es el segundo que se había agregado") {
+                REQUIRE(l.primerElemento() == 'b');
+            }
+            THEN("el ultimo elemento sigue siendo el ultimo que se agregó") {
+                REQUIRE(l.ultimoElemento() == 'c');
+            }
+            THEN("el largo es dos") {
+                REQUIRE(l.largo() == 2);
+            }
+        }
+        WHEN("se elimina el ultimo elemento") {
+            l.eliminarUltimo();
+            
+            THEN("el primer elemento sigue siendo el primero que se había agregado") {
+                REQUIRE(l.primerElemento() == 'a');
+            }
+            THEN("el ultimo elemento es el segundo que se había agregado") {
+                REQUIRE(l.ultimoElemento() == 'b');
+            }
+            THEN("el largo es dos") {
+                REQUIRE(l.largo() == 2);
+            }
+        }
+    }
+}
+
+SCENARIO("transferir elementos", "[lista]") {
+    GIVEN("dos listas con elementos") {
+        Lista<char> l1;
+        l1.agregar('a');
+        l1.agregar('b');
+        l1.agregar('c');
+
+        Lista<char> l2;
+        l2.agregar('d');
+        l2.agregar('e');
+        l2.agregar('f');
+
+        WHEN("se transfieren los elementos de una de las listas al inicio de la otra") {
+            l1.transferirAlInicioDe(&l2);
+            
+            THEN("la lista que transfirió los elementos queda vacía") {
+                REQUIRE(l1.estaVacia());
+                REQUIRE(l1.largo() == 0);
+            }
+            THEN("la lista que recibió los elementos tiene el largo total") {
+                REQUIRE(l2.largo() == 6);
+            }
+            THEN("el primer elemento de la lista que recibió los elementos es el que era el primer elemento de la lista que transfirió los elementos") {
+                REQUIRE(l2.primerElemento() == 'a');
+            }
+            THEN("el ultimo elemento de la lista que recibió los elementos se mantiene") {
+                REQUIRE(l2.ultimoElemento() == 'f');
+            }
+        }
+    }
+}
