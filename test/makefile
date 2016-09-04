@@ -1,7 +1,9 @@
 all: maketest clean
 
 maketest:
-	g++ tests.cpp TestLista.cpp TestPila.cpp -o runtests
+	rename "s/.test/.cpp/" *
+	g++ main.cpp TestLista.cpp TestPila.cpp -o runtests
+	rename "s/.cpp/.test/" *
 	./runtests
 
 clean:

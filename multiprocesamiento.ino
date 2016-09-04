@@ -1,5 +1,10 @@
+
 void setup() {
   // put your setup code here, to run once:
+  int a = 3;
+  auto lambda = [&] (int x) { return x * a; };
+  a = 2;
+  lambda(5);
 
 }
 
