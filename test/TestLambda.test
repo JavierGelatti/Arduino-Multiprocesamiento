@@ -1,0 +1,41 @@
+#include "catch.hpp"
+
+SCENARIO("lambdas de c++", "[lambda]") {
+    GIVEN("ninguna precondición") {
+        WHEN("se crea un lambda") {
+            int a = 3;
+            auto l = [&] (int x) { return x * a; };
+            
+            THEN("puede invocarse") {
+                REQUIRE(l(5) == 15);
+            }
+            THEN("funciona como closure") {
+                a = 2;
+                REQUIRE(l(5) == 10);
+            }
+        }
+    }
+}
+
+int g(int x) {
+    return x * x;
+}
+template<typename Functor>
+int f(Functor functor) {
+   return functor(10);
+}
+SCENARIO("mix con punteros a funciones", "[lambda]") {
+    GIVEN("una función y un lambda") {
+        // Ver código antes de SCENARIO
+        int a = 3;
+        auto l = [&] (int x) { return x * a; };
+
+        WHEN("se crea una función parametrizada") {
+            // Ver código antes de SCENARIO
+            THEN("la función puede recibir tanto el lambda como un puntero a la función") {
+                REQUIRE(f(l) == 30);
+                REQUIRE(f(g) == 100);
+            }
+        }
+    }
+}

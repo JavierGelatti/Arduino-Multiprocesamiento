@@ -2,7 +2,7 @@
 #define LISTA_H
 
 template <class T>
-struct Nodo;
+class Nodo;
 
 template <class T>
 class Lista {
@@ -20,10 +20,16 @@ public:
     
     void transferirAlInicioDe(Lista<T>* otraLista);
 
+    template<typename C>
+    void forEach(C &consumidor);
+    template<typename C>
+    void filtrar(C &condicion);
+
 private:
     int _largo;
     Nodo<T>* _primerNodo;
     Nodo<T>* _ultimoNodo;
+    void eliminarNodo(Nodo<T>* unNodo);
 };
 
 #include "Lista.cpp"

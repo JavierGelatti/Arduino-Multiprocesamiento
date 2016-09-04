@@ -211,3 +211,67 @@ SCENARIO("transferir elementos", "[lista]") {
         }
     }
 }
+
+SCENARIO("recorrido de listas", "[lista]") {
+    GIVEN("una lista con elementos") {
+        Lista<char> l;
+        l.agregar('a');
+        l.agregar('b');
+        l.agregar('c');
+
+        WHEN("se recorre utilizando un foreach") {
+            char elementos[3];
+            int i = 0;
+            auto consumidor = [&] (char elemento) { elementos[i++] = elemento; };
+
+            l.forEach(consumidor);
+            
+            THEN("se reciben todos los elementos en orden") {
+                REQUIRE(i == 3);
+                REQUIRE(elementos[0] == 'a');
+                REQUIRE(elementos[1] == 'b');
+                REQUIRE(elementos[2] == 'c');
+            }
+        }
+    }
+    GIVEN("una lista vacía") {
+        Lista<char> l;
+
+        WHEN("se recorre utilizando un foreach") {
+            bool consumidorEjecutado = false;
+            auto consumidor = [&] (char elemento) { consumidorEjecutado = true; };
+
+            l.forEach(consumidor);
+            
+            THEN("nunca se ejecuta el consumidor") {
+                REQUIRE(!consumidorEjecutado);
+            }
+        }
+    }
+}
+
+SCENARIO("filtrado de listas", "[lista]") {
+    GIVEN("una lista con elementos") {
+        Lista<char> l;
+        l.agregar('a');
+        l.agregar('b');
+        l.agregar('c');
+        l.agregar('b');
+        l.agregar('b');
+        l.agregar('a');
+
+        WHEN("se la filtra utilizando una condición") {
+            auto condicion = [&] (char elemento) -> bool { return elemento == 'b'; };
+
+            l.filtrar(condicion);
+            
+            THEN("solo se mantienen los elementos que cumplieron con la condición") {
+                REQUIRE(l.largo() == 3);
+                auto requireB = [&] (char elemento) {
+                    REQUIRE(elemento == 'b'); 
+                };
+                l.forEach(requireB);
+            }
+        }
+    }
+}
