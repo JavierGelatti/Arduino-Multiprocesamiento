@@ -6,7 +6,24 @@
 
 typedef void (*funcion)();
 
-class Codigo;
+class Codigo {
+public:
+    Codigo();
+    bool yaEsElMomentoDeEjecutar();
+    void ejecutarEn(milisegundos unMomento);
+    virtual void ejecutar() = 0;
+private:
+    milisegundos _elMomentoDeEjecutar;
+};
+
+template<typename C>
+class CodigoEspecifico : public Codigo {
+public:
+    CodigoEspecifico(C* unBloque) { _elBloqueOriginal = unBloque; }
+    virtual void ejecutar() { (*_elBloqueOriginal)(); };
+private:
+    C* _elBloqueOriginal;
+};
 
 class Hilo {
 public:
@@ -22,6 +39,10 @@ private:
     Lista<Codigo*>* _colaEnEspera;
 };
 
-#include "Hilo.cpp"
+template<typename C>
+void Hilo::agregarCodigo(C &codigoAEjecutar) {
+    CodigoEspecifico<C>* codigo = new CodigoEspecifico<C>(&codigoAEjecutar);
+    _cola->agregarAlFinal(codigo);
+}
 
 #endif

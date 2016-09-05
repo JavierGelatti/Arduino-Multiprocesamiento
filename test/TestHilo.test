@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "StubTiempoActual.cpp"
+#include "StubTiempoActual.h"
 #include "../Hilo.h"
 
 bool ejecutado;

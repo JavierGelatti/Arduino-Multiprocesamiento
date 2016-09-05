@@ -1,3 +1,6 @@
+#ifndef STUBTIEMPOACTUAL_CPP
+#define STUBTIEMPOACTUAL_CPP
+
 #include "../TiempoActual.h"
 
 milisegundos tiempo = 0;
@@ -7,3 +10,5 @@ void milisegundosActuales(milisegundos ms) {
 milisegundos tiempoActual() {
     return tiempo;
 }
+
+#endif

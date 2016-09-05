@@ -3,43 +3,19 @@
 
 #include "Hilo.h"
 
-class Codigo {
-public:
-    virtual void ejecutar() = 0;
-    Codigo() {
-        _elMomentoDeEjecutar = 0;
-    }
-    bool yaEsElMomentoDeEjecutar() {
-        return tiempoActual() >= _elMomentoDeEjecutar;
-    }
-    void ejecutarEn(milisegundos unMomento) {
-        _elMomentoDeEjecutar = unMomento;
-    }
-private:
-    milisegundos _elMomentoDeEjecutar;
-};
+Codigo::Codigo() {
+    _elMomentoDeEjecutar = 0;
+}
+bool Codigo::yaEsElMomentoDeEjecutar() {
+    return tiempoActual() >= _elMomentoDeEjecutar;
+}
+void Codigo::ejecutarEn(milisegundos unMomento) {
+    _elMomentoDeEjecutar = unMomento;
+}
 
-template<typename C>
-class CodigoEspecifico : public Codigo {
-public:
-    CodigoEspecifico(C* unBloque) {
-        _elBloqueOriginal = unBloque;
-    }
-    virtual void ejecutar() {
-        (*_elBloqueOriginal)();    
-    }
-private:
-    C* _elBloqueOriginal;
-};
 
 Hilo::Hilo() {
     _cola = new Lista<Codigo*>();
-}
-
-template<typename C>
-void Hilo::agregarCodigo(C &codigoAEjecutar) {
-    CodigoEspecifico<C>* codigo = new CodigoEspecifico<C>(&codigoAEjecutar);
-    _cola->agregarAlFinal(codigo);
 }
 
 void Hilo::ejecutar() {
