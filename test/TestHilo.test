@@ -80,7 +80,7 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
             }
         }
     }
-    GIVEN("un hilo y control del tiempo") {
+    GIVEN("un hilo") {
         Hilo* elHilo = new Hilo();
         milisegundosActuales(0);
 
@@ -114,6 +114,16 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 THEN("el código se ejecuta si no se ejecutó antes") {
                     elHilo->ejecutar();
                     REQUIRE(ejecutado);
+                }
+            }
+            WHEN("ya se ejecutó el código") {
+                milisegundosActuales(2000);
+                elHilo->ejecutar();
+                ejecutado = false;
+
+                THEN("el código no se ejecuta de nuevo") {
+                    elHilo->ejecutar();
+                    REQUIRE(!ejecutado);
                 }
             }
         }

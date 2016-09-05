@@ -43,6 +43,8 @@ void Hilo::agregarCodigo(C &codigoAEjecutar) {
 }
 
 void Hilo::ejecutar() {
+    if (_cola->estaVacia()) return;
+
     Codigo* aEjecutar = _cola->primerElemento();
     if (aEjecutar->yaEsElMomentoDeEjecutar()) {
         _cola->eliminarPrimero();
