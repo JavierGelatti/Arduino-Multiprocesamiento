@@ -8,3 +8,6 @@ maketest:
 
 clean:
 	rm runtests
+	rename "s/.cpp/.test/" *
+	rm -f ru.tests
+	rm -f  *~
