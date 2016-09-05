@@ -9,6 +9,7 @@ public:
     void ejecutar();
     template<typename C>
     void agregarCodigo(C &codigoAEjecutar);
+    Hilo* crearHilo();
 private:
     Lista<Hilo*>* _hilos;
 };

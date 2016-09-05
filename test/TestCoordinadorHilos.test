@@ -2,6 +2,8 @@
 
 #include "StubTiempoActual.h"
 #include "../CoordinadorHilos.h"
+#include "../Hilo.h"
+#include "../Lambda.h"
 
 SCENARIO("creacion de hilos", "[coordinador_hilos]") {
     GIVEN("un coordinador de hilos") {
@@ -9,10 +11,22 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
 
         WHEN("se ejecuta código sin condiciones de tiempo") {
             bool ejecutado = false;
-            auto codigo = [&] () { ejecutado = true; };
+            auto codigo = comando(ejecutado = true);
             elCoordinador->agregarCodigo(codigo);
             
             THEN("el código se ejecuta cuando ejecuta el coordinador") {
+                REQUIRE(!ejecutado);
+                elCoordinador->ejecutar();
+                REQUIRE(ejecutado);
+            }
+        }
+        WHEN("se crea un nuevo hilo desde el coordinador") {
+            Hilo* unHilo = elCoordinador->crearHilo();
+            bool ejecutado = false;
+            auto codigo = comando(ejecutado = true);
+            unHilo->agregarCodigo(codigo);
+            
+            THEN("el código del hilo se ejecuta cuando ejecuta el coordinador") {
                 REQUIRE(!ejecutado);
                 elCoordinador->ejecutar();
                 REQUIRE(ejecutado);
