@@ -6,6 +6,17 @@
 class Codigo {
 public:
     virtual void ejecutar() = 0;
+    Codigo() {
+        _elMomentoDeEjecutar = 0;
+    }
+    bool yaEsElMomentoDeEjecutar() {
+        return tiempoActual() >= _elMomentoDeEjecutar;
+    }
+    void ejecutarEn(milisegundos unMomento) {
+        _elMomentoDeEjecutar = unMomento;
+    }
+private:
+    milisegundos _elMomentoDeEjecutar;
 };
 
 template<typename C>
@@ -32,15 +43,22 @@ void Hilo::agregarCodigo(C &codigoAEjecutar) {
 }
 
 void Hilo::ejecutar() {
-    Codigo* aEjecutar = _cola->desencolar();
-    _colaEnEspera = _cola;
+    Codigo* aEjecutar = _cola->primerElemento();
+    if (aEjecutar->yaEsElMomentoDeEjecutar()) {
+        _cola->eliminarPrimero();
+        _colaEnEspera = _cola;
 
-    _cola = new Cola<Codigo*>();
-    aEjecutar->ejecutar();
-    _cola->transferirAlInicioDe(_colaEnEspera);
-    delete _cola;
+        _cola = new Cola<Codigo*>();
+        aEjecutar->ejecutar();
+        _cola->transferirAlInicioDe(_colaEnEspera);
+        delete _cola;
 
-    _cola = _colaEnEspera;
+        _cola = _colaEnEspera;
+    }
+}
+
+void Hilo::demorarUltimoCodigoEn(milisegundos tiempoDeDemora) {
+    _cola->ultimoElemento()->ejecutarEn(tiempoActual() + tiempoDeDemora);
 }
 
 #endif

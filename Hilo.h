@@ -2,6 +2,7 @@
 #define HILO_H
 
 #include "Cola.h"
+#include "TiempoActual.h"
 
 typedef void (*funcion)();
 
@@ -14,6 +15,8 @@ public:
 
     template <typename C>
     void agregarCodigo(C &codigoAEjecutar);
+
+    void demorarUltimoCodigoEn(milisegundos tiempoDeDemora);
 private:
     Cola<Codigo*>* _cola;
     Cola<Codigo*>* _colaEnEspera;

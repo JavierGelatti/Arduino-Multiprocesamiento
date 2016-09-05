@@ -1,6 +1,14 @@
 #include "catch.hpp"
 #include "../Hilo.h"
 
+milisegundos tiempo = 0;
+void milisegundosActuales(milisegundos ms) {
+    tiempo = ms;
+}
+milisegundos tiempoActual() {
+    return tiempo;
+}
+
 bool ejecutado;
 SCENARIO("ejecución de código", "[multiprocesamiento]") {
     GIVEN("un hilo") {
@@ -75,6 +83,44 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(secuencia[2] == '2');
                 REQUIRE(secuencia[3] == 'b');
                 REQUIRE(i == 4);
+            }
+        }
+    }
+    GIVEN("un hilo y control del tiempo") {
+        Hilo* elHilo = new Hilo();
+        milisegundosActuales(0);
+
+        WHEN("se ejecuta código con demora") {
+            bool ejecutado = false;
+            auto codigo = [&] () { ejecutado = true; };
+            elHilo->agregarCodigo(codigo);
+            elHilo->demorarUltimoCodigoEn(1000);
+            
+            THEN("el código no se ejecuta inmediatamente") {
+                REQUIRE(!ejecutado);
+                elHilo->ejecutar();
+                REQUIRE(!ejecutado);
+            }
+            WHEN("pasa menos tiempo del necesario") {
+                THEN("el código todavía no se ejecuta") {
+                    milisegundosActuales(999);
+                    elHilo->ejecutar();
+                    REQUIRE(!ejecutado);
+                }
+            }
+            WHEN("pasa el tiempo necesario") {
+                THEN("el código se ejecuta") {
+                    milisegundosActuales(1000);
+                    elHilo->ejecutar();
+                    REQUIRE(ejecutado);
+                }
+            }
+            WHEN("pasa más del tiempo necesario") {
+                THEN("el código se ejecuta si no se ejecutó antes") {
+                    milisegundosActuales(2000);
+                    elHilo->ejecutar();
+                    REQUIRE(ejecutado);
+                }
             }
         }
     }
