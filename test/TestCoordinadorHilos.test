@@ -31,11 +31,21 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
             Hilo* unHilo = elCoordinador->crearHilo();
             bool ejecutado = false;
             auto codigo = comando(ejecutado = true);
-            unHilo->agregarCodigo(codigo);
             
-            THEN("el código del hilo se ejecuta cuando ejecuta el coordinador") {
+            WHEN("se agrega código al hilo") {   
+                unHilo->agregarCodigo(codigo);
+
+                THEN("el código del hilo se ejecuta cuando ejecuta el coordinador") {
+                    REQUIRE(!ejecutado);
+                    elCoordinador->ejecutar();
+                    REQUIRE(ejecutado);
+                }
+            }
+            THEN("el código que se agregue al coordinador se asocia al ultimo hilo creado") {
+                elCoordinador->agregarCodigo(codigo);
+
                 REQUIRE(!ejecutado);
-                elCoordinador->ejecutar();
+                unHilo->ejecutar();
                 REQUIRE(ejecutado);
             }
         }
@@ -71,7 +81,7 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
             }
         }
     }
-    GIVEN("un coordinador de hilos con hilos") {
+    GIVEN("un coordinador de hilos") {
         CoordinadorHilos* elCoordinador = new CoordinadorHilos();
 
         char secuencia[7];
@@ -82,48 +92,82 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
         auto codigo4 = comando(secuencia[i++] = '4');
         auto codigo5 = comando(secuencia[i++] = '5');
 
-        Hilo* unHilo = elCoordinador->crearHilo();
-        unHilo->agregarCodigo(codigo1);
-        unHilo->agregarCodigo(codigo2);
+        WHEN("se crean hilos desde el coordinador") {
+            Hilo* unHilo = elCoordinador->crearHilo();
+            unHilo->agregarCodigo(codigo1);
+            unHilo->agregarCodigo(codigo2);
 
-        Hilo* otroHilo = elCoordinador->crearHilo();
-        otroHilo->agregarCodigo(codigo3);
-        otroHilo->agregarCodigo(codigo4);
-        otroHilo->agregarCodigo(codigo5);
+            Hilo* otroHilo = elCoordinador->crearHilo();
+            otroHilo->agregarCodigo(codigo3);
+            otroHilo->agregarCodigo(codigo4);
+            otroHilo->agregarCodigo(codigo5);
 
-        WHEN("se ejecuta el coordinador") {
-            for (int j = 0; j < 5; j++) {
-                elCoordinador->ejecutar();
-            }
-            
-            THEN("el código de los hilos se ejecutó entrelazado") {
-                char esperado[6] = "13245";
+            WHEN("se ejecuta el coordinador") {
                 for (int j = 0; j < 5; j++) {
-                    REQUIRE(secuencia[j] == esperado[j]);
+                    elCoordinador->ejecutar();
+                }
+                
+                THEN("el código de los hilos se ejecutó entrelazado") {
+                    char esperado[6] = "13245";
+                    for (int j = 0; j < 5; j++) {
+                        REQUIRE(secuencia[j] == esperado[j]);
+                    }
+                }
+                THEN("los hilos se eliminan (cuando finaliza su ejecución)") {
+                    REQUIRE(elCoordinador->cantidadDeHilos() == 0);
                 }
             }
-            THEN("los hilos se eliminan (cuando finaliza su ejecución)") {
-                REQUIRE(elCoordinador->cantidadDeHilos() == 0);
+            WHEN("se agrega codigo al coordinador") {
+                auto codigo6 = comando(secuencia[i++] = '6');
+                auto codigo7 = comando(secuencia[i++] = '7');
+
+                elCoordinador->agregarCodigo(codigo6);
+                elCoordinador->agregarCodigo(codigo7);
+                
+                WHEN("se ejecuta el coordinador") {
+                    for (int j = 0; j < 7; j++) {
+                        elCoordinador->ejecutar();
+                    }
+                    
+                    THEN("el código del coordinador se ejecuta asociado al ultimo hilo") {
+                        char esperado[8] = "1324567";
+                        for (int j = 0; j < 7; j++) {
+                            REQUIRE(secuencia[j] == esperado[j]);
+                        }
+                    }
+                }
             }
         }
-        
-        WHEN("se agrega codigo al coordinador y se ejecuta") {
+        WHEN("se agrega codigo al coordinador") {
             auto codigo6 = comando(secuencia[i++] = '6');
             auto codigo7 = comando(secuencia[i++] = '7');
 
             elCoordinador->agregarCodigo(codigo6);
             elCoordinador->agregarCodigo(codigo7);
 
-            for (int j = 0; j < 7; j++) {
-                elCoordinador->ejecutar();
-            }
+            WHEN("se crean hilos desde el coordinador") {
+                Hilo* unHilo = elCoordinador->crearHilo();
+                unHilo->agregarCodigo(codigo1);
+                unHilo->agregarCodigo(codigo2);
 
-            THEN("el código del coordinador se ejecuta junto al de los hilos") {
-                char esperado[8] = "6137245";
-                for (int j = 0; j < 7; j++) {
-                    REQUIRE(secuencia[j] == esperado[j]);
+                Hilo* otroHilo = elCoordinador->crearHilo();
+                otroHilo->agregarCodigo(codigo3);
+                otroHilo->agregarCodigo(codigo4);
+                otroHilo->agregarCodigo(codigo5);
+
+                WHEN("se ejecuta el coordinador") {
+                    for (int j = 0; j < 7; j++) {
+                        elCoordinador->ejecutar();
+                    }
+                    
+                    THEN("el código del coordinador se ejecuta junto al de los hilos") {
+                        char esperado[8] = "6137245";
+                        for (int j = 0; j < 7; j++) {
+                            REQUIRE(secuencia[j] == esperado[j]);
+                        }
+                    }
                 }
-            }
+            } 
         }
     }
 }

@@ -11,6 +11,7 @@ public:
     void agregarCodigo(C &codigoAEjecutar);
     Hilo* crearHilo();
     int cantidadDeHilos();
+    void demorarSiguienteCodigoEn(milisegundos tiempoDeDemora);
 private:
     Lista<Hilo*>* _hilos;
 };
@@ -20,7 +21,7 @@ void CoordinadorHilos::agregarCodigo(C &codigoAEjecutar) {
     if (_hilos->estaVacia())
         _hilos->agregar(new Hilo());
 
-    _hilos->primerElemento()->agregarCodigo(codigoAEjecutar);
+    _hilos->ultimoElemento()->agregarCodigo(codigoAEjecutar);
 }
 
 #endif

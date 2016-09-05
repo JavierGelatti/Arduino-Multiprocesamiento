@@ -24,4 +24,8 @@ int CoordinadorHilos::cantidadDeHilos() {
     return _hilos->largo();
 }
 
+void CoordinadorHilos::demorarSiguienteCodigoEn(milisegundos tiempoDeDemora) {
+    _hilos->ultimoElemento()->demorarSiguienteCodigoEn(tiempoDeDemora);
+}
+
 #endif
