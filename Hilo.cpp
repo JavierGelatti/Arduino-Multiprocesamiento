@@ -3,8 +3,6 @@
 
 #include "Hilo.h"
 
-typedef void (*funcion)();
-
 class Codigo {
 public:
     virtual void ejecutar() = 0;
@@ -24,17 +22,25 @@ private:
 };
 
 Hilo::Hilo() {
-    _pila = new Pila<Codigo*>();
+    _cola = new Cola<Codigo*>();
 }
 
 template<typename C>
 void Hilo::agregarCodigo(C &codigoAEjecutar) {
     CodigoEspecifico<C>* codigo = new CodigoEspecifico<C>(&codigoAEjecutar);
-    _pila->push(codigo);
+    _cola->agregarAlFinal(codigo);
 }
 
 void Hilo::ejecutar() {
-    _pila->pop()->ejecutar();
+    Codigo* aEjecutar = _cola->desencolar();
+    _colaEnEspera = _cola;
+
+    _cola = new Cola<Codigo*>();
+    aEjecutar->ejecutar();
+    _cola->transferirAlInicioDe(_colaEnEspera);
+    delete _cola;
+
+    _cola = _colaEnEspera;
 }
 
 #endif

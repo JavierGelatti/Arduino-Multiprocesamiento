@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "../Hilo.h"
 
+bool ejecutado;
 SCENARIO("ejecución de código", "[multiprocesamiento]") {
     GIVEN("un hilo") {
         Hilo* elHilo = new Hilo();
@@ -14,6 +15,66 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(!ejecutado);
                 elHilo->ejecutar();
                 REQUIRE(ejecutado);
+            }
+        }
+        WHEN("se pasa una referencia a una función") {
+            ejecutado = false;
+            funcion f1 = ({ struct _lambda {
+                static void _f() { ejecutado = true; } 
+            }; *_lambda::_f; });
+
+            elHilo->agregarCodigo(f1);
+            
+            THEN("la función se ejecuta cuando ejecuta el hilo") {
+                REQUIRE(!ejecutado);
+                elHilo->ejecutar();
+                REQUIRE(ejecutado);
+            }
+        }
+        WHEN("se ejecutan varios códigos sin condiciones de tiempo") {
+            char secuencia[2];
+            int i = 0;
+            auto codigo1 = [&] () { secuencia[i++] = 'a'; };
+            auto codigo2 = [&] () { secuencia[i++] = 'b'; };
+            elHilo->agregarCodigo(codigo1);
+            elHilo->agregarCodigo(codigo2);
+            
+            THEN("los codigos se ejecutan en el mismo orden") {
+                REQUIRE(i == 0);
+                elHilo->ejecutar();
+                elHilo->ejecutar();
+                REQUIRE(secuencia[0] == 'a');
+                REQUIRE(secuencia[1] == 'b');
+                REQUIRE(i == 2);
+            }
+        }
+        WHEN("un codigo requiere la ejecución de otro") {
+            char secuencia[4];
+            int i = 0;
+
+            auto codigo1 = [&] () { secuencia[i++] = '1'; };
+            auto codigo2 = [&] () { secuencia[i++] = '2'; };
+            auto codigoA = [&] () {
+                secuencia[i++] = 'a';
+                elHilo->agregarCodigo(codigo1);
+                elHilo->agregarCodigo(codigo2);
+            };
+            auto codigoB = [&] () { secuencia[i++] = 'b'; };
+
+            elHilo->agregarCodigo(codigoA);
+            elHilo->agregarCodigo(codigoB);
+            
+            THEN("los codigos se ejecutan en el mismo orden") {
+                REQUIRE(i == 0);
+                elHilo->ejecutar();
+                elHilo->ejecutar();
+                elHilo->ejecutar();
+                elHilo->ejecutar();
+                REQUIRE(secuencia[0] == 'a');
+                REQUIRE(secuencia[1] == '1');
+                REQUIRE(secuencia[2] == '2');
+                REQUIRE(secuencia[3] == 'b');
+                REQUIRE(i == 4);
             }
         }
     }

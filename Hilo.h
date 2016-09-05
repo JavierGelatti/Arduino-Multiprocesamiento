@@ -1,7 +1,9 @@
 #ifndef HILO_H
 #define HILO_H
 
-#include "Pila.h"
+#include "Cola.h"
+
+typedef void (*funcion)();
 
 class Codigo;
 
@@ -13,7 +15,8 @@ public:
     template <typename C>
     void agregarCodigo(C &codigoAEjecutar);
 private:
-    Pila<Codigo*>* _pila;
+    Cola<Codigo*>* _cola;
+    Cola<Codigo*>* _colaEnEspera;
 };
 
 #include "Hilo.cpp"
