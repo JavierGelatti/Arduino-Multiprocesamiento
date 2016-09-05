@@ -1,0 +1,9 @@
+#include "../TiempoActual.h"
+
+milisegundos tiempo = 0;
+void milisegundosActuales(milisegundos ms) {
+    tiempo = ms;
+}
+milisegundos tiempoActual() {
+    return tiempo;
+}

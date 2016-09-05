@@ -1,13 +1,7 @@
 #include "catch.hpp"
-#include "../Hilo.h"
 
-milisegundos tiempo = 0;
-void milisegundosActuales(milisegundos ms) {
-    tiempo = ms;
-}
-milisegundos tiempoActual() {
-    return tiempo;
-}
+#include "StubTiempoActual.cpp"
+#include "../Hilo.h"
 
 bool ejecutado;
 SCENARIO("ejecución de código", "[multiprocesamiento]") {
@@ -102,22 +96,22 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(!ejecutado);
             }
             WHEN("pasa menos tiempo del necesario") {
+                milisegundosActuales(999);
                 THEN("el código todavía no se ejecuta") {
-                    milisegundosActuales(999);
                     elHilo->ejecutar();
                     REQUIRE(!ejecutado);
                 }
             }
             WHEN("pasa el tiempo necesario") {
+                milisegundosActuales(1000);
                 THEN("el código se ejecuta") {
-                    milisegundosActuales(1000);
                     elHilo->ejecutar();
                     REQUIRE(ejecutado);
                 }
             }
             WHEN("pasa más del tiempo necesario") {
+                milisegundosActuales(2000);
                 THEN("el código se ejecuta si no se ejecutó antes") {
-                    milisegundosActuales(2000);
                     elHilo->ejecutar();
                     REQUIRE(ejecutado);
                 }
