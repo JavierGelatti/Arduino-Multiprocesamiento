@@ -10,10 +10,13 @@ class Codigo {
 public:
     Codigo();
     bool yaEsElMomentoDeEjecutar();
-    void ejecutarEn(milisegundos unMomento);
+    void ejecutarEn(milisegundos unaDemora);
+    void iniciarTemporizador();
     virtual void ejecutar() = 0;
 private:
-    milisegundos _elMomentoDeEjecutar;
+    milisegundos _laDemora;
+    milisegundos _tiempoInicio;
+    bool _temporizadorIniciado;
 };
 
 template<typename C>
@@ -34,15 +37,19 @@ public:
     void agregarCodigo(C &codigoAEjecutar);
 
     void demorarUltimoCodigoEn(milisegundos tiempoDeDemora);
+    void demorarSiguienteCodigoEn(milisegundos tiempoDeDemora);
     bool terminoDeEjecutarse();
 private:
     Lista<Codigo*>* _cola;
     Lista<Codigo*>* _colaEnEspera;
+    milisegundos _demoraSiguiente;
 };
 
 template<typename C>
 void Hilo::agregarCodigo(C &codigoAEjecutar) {
     CodigoEspecifico<C>* codigo = new CodigoEspecifico<C>(&codigoAEjecutar);
+    codigo->ejecutarEn(_demoraSiguiente);
+    _demoraSiguiente = 0;
     _cola->agregarAlFinal(codigo);
 }
 

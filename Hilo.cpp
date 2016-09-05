@@ -4,18 +4,30 @@
 #include "Hilo.h"
 
 Codigo::Codigo() {
-    _elMomentoDeEjecutar = 0;
+    _laDemora = 0;
+    _temporizadorIniciado = false;
 }
 bool Codigo::yaEsElMomentoDeEjecutar() {
-    return tiempoActual() >= _elMomentoDeEjecutar;
+    if (!_temporizadorIniciado)
+        return _laDemora == 0;
+
+    return tiempoActual() >= _tiempoInicio + _laDemora;
 }
-void Codigo::ejecutarEn(milisegundos unMomento) {
-    _elMomentoDeEjecutar = unMomento;
+void Codigo::ejecutarEn(milisegundos unaDemora) {
+    _laDemora = unaDemora;
+}
+void Codigo::iniciarTemporizador() {
+    if (_temporizadorIniciado)
+        return;
+
+    _temporizadorIniciado = true;
+    _tiempoInicio = tiempoActual();
 }
 
 
 Hilo::Hilo() {
     _cola = new Lista<Codigo*>();
+    _demoraSiguiente = 0;
 }
 
 void Hilo::ejecutar() {
@@ -33,10 +45,17 @@ void Hilo::ejecutar() {
 
         _cola = _colaEnEspera;
     }
+    
+    if (!_cola->estaVacia())
+        _cola->primerElemento()->iniciarTemporizador();
 }
 
 void Hilo::demorarUltimoCodigoEn(milisegundos tiempoDeDemora) {
-    _cola->ultimoElemento()->ejecutarEn(tiempoActual() + tiempoDeDemora);
+    _cola->ultimoElemento()->ejecutarEn(tiempoDeDemora);
+}
+
+void Hilo::demorarSiguienteCodigoEn(milisegundos tiempoDeDemora) {
+    _demoraSiguiente = tiempoDeDemora;
 }
 
 bool Hilo::terminoDeEjecutarse() {

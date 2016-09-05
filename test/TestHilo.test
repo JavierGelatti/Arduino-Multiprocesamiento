@@ -124,6 +124,56 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
             elHilo->agregarCodigo(codigo);
             elHilo->demorarUltimoCodigoEn(1000);
             
+            elHilo->ejecutar();
+            THEN("el código no se ejecuta inmediatamente") {
+                elHilo->ejecutar();
+                REQUIRE(!ejecutado);
+            }
+            THEN("todavía no terminó de ejecutarse") {
+                REQUIRE(!elHilo->terminoDeEjecutarse());
+            }
+            WHEN("pasa menos tiempo del necesario") {
+                milisegundosActuales(999);
+                THEN("el código todavía no se ejecuta") {
+                    elHilo->ejecutar();
+                    REQUIRE(!ejecutado);
+                }
+            }
+            WHEN("pasa el tiempo necesario") {
+                milisegundosActuales(1000);
+                THEN("el código se ejecuta") {
+                    elHilo->ejecutar();
+                    REQUIRE(ejecutado);
+                }
+            }
+            WHEN("pasa más del tiempo necesario") {
+                milisegundosActuales(2000);
+                THEN("el código se ejecuta si no se ejecutó antes") {
+                    elHilo->ejecutar();
+                    REQUIRE(ejecutado);
+                }
+            }
+            WHEN("ya se ejecutó el código") {
+                milisegundosActuales(2000);
+                elHilo->ejecutar();
+                ejecutado = false;
+
+                THEN("el código no se ejecuta de nuevo") {
+                    elHilo->ejecutar();
+                    REQUIRE(!ejecutado);
+                }
+                THEN("el hilo terminó de ejecutarse") {
+                    REQUIRE(elHilo->terminoDeEjecutarse());
+                }
+            }
+        }
+        WHEN("se especifica la demora antes") {
+            bool ejecutado = false;
+            auto codigo = comando(ejecutado = true);
+            elHilo->demorarSiguienteCodigoEn(1000);
+            elHilo->agregarCodigo(codigo);
+            
+            elHilo->ejecutar();
             THEN("el código no se ejecuta inmediatamente") {
                 REQUIRE(!ejecutado);
                 elHilo->ejecutar();
@@ -164,6 +214,117 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 }
                 THEN("el hilo terminó de ejecutarse") {
                     REQUIRE(elHilo->terminoDeEjecutarse());
+                }
+            }
+        }
+        WHEN("se encadenan códigos con demora") {
+            bool ejecutado1 = false;
+            bool ejecutado2 = false;
+            bool ejecutado3 = false;
+            auto codigo1 = comando(ejecutado1 = true);
+            auto codigo2 = comando(ejecutado2 = true);
+            auto codigo3 = comando(ejecutado3 = true);
+
+            elHilo->agregarCodigo(codigo1);
+            elHilo->demorarUltimoCodigoEn(1000);
+
+            elHilo->demorarSiguienteCodigoEn(500);
+            elHilo->agregarCodigo(codigo2);
+
+            elHilo->agregarCodigo(codigo3);
+            elHilo->demorarUltimoCodigoEn(200);
+            
+            elHilo->ejecutar();
+            THEN("ninguno de los códigos se ejecuta inmediatamente") {
+                elHilo->ejecutar();
+                REQUIRE(!ejecutado1);
+                REQUIRE(!ejecutado2);
+                REQUIRE(!ejecutado3);
+            }
+            WHEN("pasa menos tiempo del necesario para ejecutar el primer codigo") {
+                milisegundosActuales(1000 - 1);
+                THEN("el código todavía no se ejecuta") {
+                    elHilo->ejecutar();
+                    REQUIRE(!ejecutado1);
+                    REQUIRE(!ejecutado2);
+                    REQUIRE(!ejecutado3);
+                }
+            }
+            WHEN("pasa justo el tiempo necesario para ejecutar el primer codigo") {
+                milisegundosActuales(1000);
+                THEN("el primer código se ejecuta") {
+                    elHilo->ejecutar();
+                    REQUIRE(ejecutado1);
+                    REQUIRE(!ejecutado2);
+                    REQUIRE(!ejecutado3);
+                }
+            }
+            WHEN("pasa más del tiempo necesario para ejecutar el primer codigo pero menos que el necesario para el segundo") {
+                milisegundosActuales(1000 + 100);
+                THEN("solo el primer código se ejecuta") {
+                    elHilo->ejecutar();
+                    REQUIRE(ejecutado1);
+                    REQUIRE(!ejecutado2);
+                    REQUIRE(!ejecutado3);
+                }
+            }
+            WHEN("ya se ejecutó el primer código") {
+                milisegundosActuales(1000);
+                elHilo->ejecutar();
+                REQUIRE(ejecutado1);
+
+                WHEN("pasa menos tiempo del necesario para ejecutar el segundo codigo") {
+                    milisegundosActuales(1000 + 100);
+                    THEN("el segundo código todavía no se ejecuta") {
+                        elHilo->ejecutar();
+                        REQUIRE(!ejecutado2);
+                        REQUIRE(!ejecutado3);
+                    }
+                }
+                WHEN("pasa justo el tiempo necesario para ejecutar el segundo codigo") {
+                    milisegundosActuales(1000 + 500);
+                    THEN("el segundo código se ejecuta") {
+                        elHilo->ejecutar();
+                        REQUIRE(ejecutado2);
+                        REQUIRE(!ejecutado3);
+                    }
+                }
+                WHEN("pasa más del tiempo necesario para ejecutar el segundo codigo pero menos que el necesario para el tercero") {
+                    milisegundosActuales(1000 + 500 + 100);
+                    THEN("solo el segundo código se ejecuta") {
+                        elHilo->ejecutar();
+                        REQUIRE(ejecutado2);
+                        REQUIRE(!ejecutado3);
+                    }
+                }
+            }
+            WHEN("ya se ejecutó el segundo código") {
+                milisegundosActuales(1000);
+                elHilo->ejecutar();
+                milisegundosActuales(1000 + 500);
+                elHilo->ejecutar();
+                REQUIRE(ejecutado2);
+
+                WHEN("pasa menos tiempo del necesario para ejecutar el tercer codigo") {
+                    milisegundosActuales(1000 + 500 + 100);
+                    THEN("el tercer código todavía no se ejecuta") {
+                        elHilo->ejecutar();
+                        REQUIRE(!ejecutado3);
+                    }
+                }
+                WHEN("pasa justo el tiempo necesario para ejecutar el tercer codigo") {
+                    milisegundosActuales(1000 + 500 + 200);
+                    THEN("el tercer código se ejecuta") {
+                        elHilo->ejecutar();
+                        REQUIRE(ejecutado3);
+                    }
+                }
+                WHEN("pasa más del tiempo necesario para ejecutar el tercer codigo") {
+                    milisegundosActuales(1000 + 500 + 200 + 100);
+                    THEN("el tercer código se ejecuta") {
+                        elHilo->ejecutar();
+                        REQUIRE(ejecutado3);
+                    }
                 }
             }
         }
