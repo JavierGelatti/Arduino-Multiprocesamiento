@@ -1,20 +1,84 @@
 #include "catch.hpp"
 
-SCENARIO("lambdas de c++", "[lambda]") {
-    GIVEN("ninguna precondición") {
-        WHEN("se crea un lambda") {
-            int a = 3;
-            auto l = [&] (int x) { return x * a; };
-            
-            THEN("puede invocarse") {
-                REQUIRE(l(5) == 15);
+#include "../Lambda.h"
+
+SCENARIO("fun with lambdas", "[lambda]") {
+    GIVEN("un closure nativo que multiplica por una variable que vale 3") {
+        int a = 3;
+        auto l = [&] (int x) { return x * a; };
+
+        WHEN("se lo invoca con 2") {
+            int resultado = l(2);
+            THEN("el resultado es 6") {
+                REQUIRE(resultado == 6);
             }
-            THEN("funciona como closure") {
-                a = 2;
-                REQUIRE(l(5) == 10);
+        }
+        WHEN("se modifica el valor de la variable a 1 y se lo invoca con 2") {
+            a = 1;
+            int resultado = l(2);
+            THEN("el resultado es 2") {
+                REQUIRE(resultado == 2);
             }
         }
     }
+    GIVEN("un lambda que multiplica por 2") {
+        auto l = lambda(int x, return 2 * x);
+
+        WHEN("se lo invoca con 3") {
+            int resultado = l(3);
+            THEN("el resultado es 6") {
+                REQUIRE(resultado == 6);
+            }
+        }
+    }
+    GIVEN("una función anonima que multiplica por 2") {
+        auto l = funcion_anonima(int, (int x) {return 2 * x;});
+
+        WHEN("se la invoca con 3") {
+            int resultado = l(3);
+            THEN("el resultado es 6") {
+                REQUIRE(resultado == 6);
+            }
+        }
+    }
+    GIVEN("un closure que multiplica por una variable que vale 3") {
+        int a = 3;
+        auto l = closure(int x, return a * x);
+
+        WHEN("se lo invoca con 2") {
+            int resultado = l(2);
+            THEN("el resultado es 6") {
+                REQUIRE(resultado == 6);
+            }
+        }
+        WHEN("se modifica el valor de la variable a 1 y se lo invoca con 2") {
+            a = 1;
+            int resultado = l(2);
+            THEN("el resultado es 2") {
+                REQUIRE(resultado == 2);
+            }
+        }
+    }
+    GIVEN("un closure sin parametros que devuelve una variable externa") {
+        int a = 3;
+        auto l = comando(return a);
+
+        WHEN("se lo invoca") {
+            int resultado = l();
+            THEN("devuelve el valor de la variable") {
+                REQUIRE(resultado == 3);
+            }
+        }
+        WHEN("se modifica el valor de la variable y se lo invoca") {
+            a = 1;
+            int resultado = l();
+            THEN("devuelve el nuevo valor de la variable") {
+                REQUIRE(resultado == 1);
+            }
+        }
+    }
+
+
 }
 
 int g(int x) {
@@ -26,12 +90,12 @@ int f(Functor functor) {
 }
 SCENARIO("mix con punteros a funciones", "[lambda]") {
     GIVEN("una función y un lambda") {
-        // Ver código antes de SCENARIO
+        // Ver código antes de SCENARIO [g(z)]
         int a = 3;
         auto l = [&] (int x) { return x * a; };
 
         WHEN("se crea una función parametrizada") {
-            // Ver código antes de SCENARIO
+            // Ver código antes de SCENARIO [f(functor)]
             THEN("la función puede recibir tanto el lambda como un puntero a la función") {
                 REQUIRE(f(l) == 30);
                 REQUIRE(f(g) == 100);
