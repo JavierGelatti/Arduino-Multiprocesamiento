@@ -34,6 +34,7 @@ public:
     void agregarCodigo(C &codigoAEjecutar);
 
     void demorarUltimoCodigoEn(milisegundos tiempoDeDemora);
+    bool terminoDeEjecutarse();
 private:
     Lista<Codigo*>* _cola;
     Lista<Codigo*>* _colaEnEspera;

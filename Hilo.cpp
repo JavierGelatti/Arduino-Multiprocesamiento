@@ -39,4 +39,8 @@ void Hilo::demorarUltimoCodigoEn(milisegundos tiempoDeDemora) {
     _cola->ultimoElemento()->ejecutarEn(tiempoActual() + tiempoDeDemora);
 }
 
+bool Hilo::terminoDeEjecutarse() {
+    return _cola->estaVacia();
+}
+
 #endif

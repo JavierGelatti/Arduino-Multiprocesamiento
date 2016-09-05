@@ -11,12 +11,17 @@ CoordinadorHilos::CoordinadorHilos() {
 
 void CoordinadorHilos::ejecutar() {
     _hilos->forEach(lambda(Hilo* h, h->ejecutar()));
+    _hilos->filtrar(lambda(Hilo* h, return !h->terminoDeEjecutarse()));
 }
 
 Hilo* CoordinadorHilos::crearHilo() {
     Hilo* elHiloNuevo = new Hilo();
     _hilos->agregar(elHiloNuevo);
     return elHiloNuevo;
+}
+
+int CoordinadorHilos::cantidadDeHilos() {
+    return _hilos->largo();
 }
 
 #endif

@@ -9,7 +9,7 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
     GIVEN("un hilo") {
         Hilo* elHilo = new Hilo();
 
-        WHEN("se ejecuta código sin condiciones de tiempo") {
+        WHEN("se agrega código sin condiciones de tiempo") {
             bool ejecutado = false;
             auto codigo = comando(ejecutado = true);
             elHilo->agregarCodigo(codigo);
@@ -18,6 +18,16 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(!ejecutado);
                 elHilo->ejecutar();
                 REQUIRE(ejecutado);
+            }
+            THEN("todavía no terminó de ejecutarse") {
+                REQUIRE(!elHilo->terminoDeEjecutarse());
+            }
+            WHEN("ya se ejecutó el código") {
+                elHilo->ejecutar();
+
+                THEN("el hilo terminó de ejecutarse") {
+                    REQUIRE(elHilo->terminoDeEjecutarse());
+                }
             }
         }
         WHEN("se pasa una referencia a una función") {
@@ -29,6 +39,16 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(!ejecutado);
                 elHilo->ejecutar();
                 REQUIRE(ejecutado);
+            }
+            THEN("todavía no terminó de ejecutarse") {
+                REQUIRE(!elHilo->terminoDeEjecutarse());
+            }
+            WHEN("ya se ejecutó la función") {
+                elHilo->ejecutar();
+
+                THEN("el hilo terminó de ejecutarse") {
+                    REQUIRE(elHilo->terminoDeEjecutarse());
+                }
             }
         }
         WHEN("se ejecutan varios códigos sin condiciones de tiempo") {
@@ -46,6 +66,17 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(secuencia[0] == 'a');
                 REQUIRE(secuencia[1] == 'b');
                 REQUIRE(i == 2);
+            }
+            THEN("todavía no terminó de ejecutarse") {
+                REQUIRE(!elHilo->terminoDeEjecutarse());
+            }
+            WHEN("ya se ejecutó el código") {
+                elHilo->ejecutar();
+                elHilo->ejecutar();
+
+                THEN("el hilo terminó de ejecutarse") {
+                    REQUIRE(elHilo->terminoDeEjecutarse());
+                }
             }
         }
         WHEN("un codigo requiere la ejecución de otro") {
@@ -77,6 +108,11 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(i == 4);
             }
         }
+        WHEN("el hilo no tiene código") {            
+            THEN("terminó de ejecutarse") {
+                REQUIRE(elHilo->terminoDeEjecutarse());
+            }
+        }
     }
     GIVEN("un hilo") {
         Hilo* elHilo = new Hilo();
@@ -92,6 +128,9 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 REQUIRE(!ejecutado);
                 elHilo->ejecutar();
                 REQUIRE(!ejecutado);
+            }
+            THEN("todavía no terminó de ejecutarse") {
+                REQUIRE(!elHilo->terminoDeEjecutarse());
             }
             WHEN("pasa menos tiempo del necesario") {
                 milisegundosActuales(999);
@@ -122,6 +161,9 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
                 THEN("el código no se ejecuta de nuevo") {
                     elHilo->ejecutar();
                     REQUIRE(!ejecutado);
+                }
+                THEN("el hilo terminó de ejecutarse") {
+                    REQUIRE(elHilo->terminoDeEjecutarse());
                 }
             }
         }

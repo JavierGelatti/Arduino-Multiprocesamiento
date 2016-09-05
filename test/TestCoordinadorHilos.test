@@ -6,9 +6,16 @@
 #include "../Lambda.h"
 
 SCENARIO("creacion de hilos", "[coordinador_hilos]") {
-    GIVEN("un coordinador de hilos") {
+    GIVEN("un coordinador de hilos nuevo") {
         CoordinadorHilos* elCoordinador = new CoordinadorHilos();
 
+        WHEN("se le pregunta la cantidad de hilos") {
+            int nroHilos = elCoordinador->cantidadDeHilos();
+            
+            THEN("es igual a 1") {
+                REQUIRE(nroHilos == 1);
+            }
+        }
         WHEN("se ejecuta código sin condiciones de tiempo") {
             bool ejecutado = false;
             auto codigo = comando(ejecutado = true);
@@ -30,6 +37,92 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
                 REQUIRE(!ejecutado);
                 elCoordinador->ejecutar();
                 REQUIRE(ejecutado);
+            }
+        }
+        WHEN("se ejecuta el coordinador sin haber agregado codigo") {
+            elCoordinador->ejecutar();
+            elCoordinador->ejecutar();
+            elCoordinador->ejecutar();
+            
+            THEN("no hay errores") {
+                REQUIRE(true);
+            }
+            THEN("el hilo vacío se elimina") {
+                REQUIRE(elCoordinador->cantidadDeHilos() == 0);
+            }
+        }
+    }
+    GIVEN("un coordinador de hilos sin hilos") {
+        CoordinadorHilos* elCoordinador = new CoordinadorHilos();
+        elCoordinador->ejecutar();
+        REQUIRE(elCoordinador->cantidadDeHilos() == 0);
+        
+        WHEN("se agrega código") {
+            bool ejecutado = false;
+            auto codigo = comando(ejecutado = true);
+            elCoordinador->agregarCodigo(codigo);
+            
+            THEN("se crea un nuevo hilo") {
+                REQUIRE(elCoordinador->cantidadDeHilos() == 1);
+            }
+            THEN("el código se ejecuta normalmente") {
+                elCoordinador->ejecutar();
+                REQUIRE(ejecutado);
+            }
+        }
+    }
+    GIVEN("un coordinador de hilos con hilos") {
+        CoordinadorHilos* elCoordinador = new CoordinadorHilos();
+
+        char secuencia[7];
+        int i = 0;
+        auto codigo1 = comando(secuencia[i++] = '1');
+        auto codigo2 = comando(secuencia[i++] = '2');
+        auto codigo3 = comando(secuencia[i++] = '3');
+        auto codigo4 = comando(secuencia[i++] = '4');
+        auto codigo5 = comando(secuencia[i++] = '5');
+
+        Hilo* unHilo = elCoordinador->crearHilo();
+        unHilo->agregarCodigo(codigo1);
+        unHilo->agregarCodigo(codigo2);
+
+        Hilo* otroHilo = elCoordinador->crearHilo();
+        otroHilo->agregarCodigo(codigo3);
+        otroHilo->agregarCodigo(codigo4);
+        otroHilo->agregarCodigo(codigo5);
+
+        WHEN("se ejecuta el coordinador") {
+            for (int j = 0; j < 5; j++) {
+                elCoordinador->ejecutar();
+            }
+            
+            THEN("el código de los hilos se ejecutó entrelazado") {
+                char esperado[6] = "13245";
+                for (int j = 0; j < 5; j++) {
+                    REQUIRE(secuencia[j] == esperado[j]);
+                }
+            }
+            THEN("los hilos se eliminan (cuando finaliza su ejecución)") {
+                REQUIRE(elCoordinador->cantidadDeHilos() == 0);
+            }
+        }
+        
+        WHEN("se agrega codigo al coordinador y se ejecuta") {
+            auto codigo6 = comando(secuencia[i++] = '6');
+            auto codigo7 = comando(secuencia[i++] = '7');
+
+            elCoordinador->agregarCodigo(codigo6);
+            elCoordinador->agregarCodigo(codigo7);
+
+            for (int j = 0; j < 7; j++) {
+                elCoordinador->ejecutar();
+            }
+
+            THEN("el código del coordinador se ejecuta junto al de los hilos") {
+                char esperado[8] = "6137245";
+                for (int j = 0; j < 7; j++) {
+                    REQUIRE(secuencia[j] == esperado[j]);
+                }
             }
         }
     }
