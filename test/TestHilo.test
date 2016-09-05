@@ -2,6 +2,7 @@
 
 #include "StubTiempoActual.h"
 #include "../Hilo.h"
+#include "../Lambda.h"
 
 bool ejecutado;
 SCENARIO("ejecución de código", "[multiprocesamiento]") {
@@ -10,7 +11,7 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
 
         WHEN("se ejecuta código sin condiciones de tiempo") {
             bool ejecutado = false;
-            auto codigo = [&] () { ejecutado = true; };
+            auto codigo = comando(ejecutado = true);
             elHilo->agregarCodigo(codigo);
             
             THEN("el código se ejecuta cuando ejecuta el hilo") {
@@ -21,10 +22,7 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
         }
         WHEN("se pasa una referencia a una función") {
             ejecutado = false;
-            funcion f1 = ({ struct _lambda {
-                static void _f() { ejecutado = true; } 
-            }; *_lambda::_f; });
-
+            funcion f1 = funcion_anonima(void, () { ejecutado = true; });
             elHilo->agregarCodigo(f1);
             
             THEN("la función se ejecuta cuando ejecuta el hilo") {
@@ -36,8 +34,8 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
         WHEN("se ejecutan varios códigos sin condiciones de tiempo") {
             char secuencia[2];
             int i = 0;
-            auto codigo1 = [&] () { secuencia[i++] = 'a'; };
-            auto codigo2 = [&] () { secuencia[i++] = 'b'; };
+            auto codigo1 = comando(secuencia[i++] = 'a');
+            auto codigo2 = comando(secuencia[i++] = 'b');
             elHilo->agregarCodigo(codigo1);
             elHilo->agregarCodigo(codigo2);
             
@@ -54,14 +52,14 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
             char secuencia[4];
             int i = 0;
 
-            auto codigo1 = [&] () { secuencia[i++] = '1'; };
-            auto codigo2 = [&] () { secuencia[i++] = '2'; };
-            auto codigoA = [&] () {
+            auto codigo1 = comando(secuencia[i++] = '1');
+            auto codigo2 = comando(secuencia[i++] = '2');
+            auto codigoA = comando(
                 secuencia[i++] = 'a';
                 elHilo->agregarCodigo(codigo1);
                 elHilo->agregarCodigo(codigo2);
-            };
-            auto codigoB = [&] () { secuencia[i++] = 'b'; };
+            );
+            auto codigoB = comando(secuencia[i++] = 'b');
 
             elHilo->agregarCodigo(codigoA);
             elHilo->agregarCodigo(codigoB);
@@ -86,7 +84,7 @@ SCENARIO("ejecución de código", "[multiprocesamiento]") {
 
         WHEN("se ejecuta código con demora") {
             bool ejecutado = false;
-            auto codigo = [&] () { ejecutado = true; };
+            auto codigo = comando(ejecutado = true);
             elHilo->agregarCodigo(codigo);
             elHilo->demorarUltimoCodigoEn(1000);
             
