@@ -1,0 +1,22 @@
+#include "catch.hpp"
+
+#include "StubTiempoActual.h"
+#include "../CoordinadorHilos.h"
+
+SCENARIO("creacion de hilos", "[coordinador_hilos]") {
+    GIVEN("un coordinador de hilos") {
+        CoordinadorHilos* elCoordinador = new CoordinadorHilos();
+
+        WHEN("se ejecuta código sin condiciones de tiempo") {
+            bool ejecutado = false;
+            auto codigo = [&] () { ejecutado = true; };
+            elCoordinador->agregarCodigo(codigo);
+            
+            THEN("el código se ejecuta cuando ejecuta el coordinador") {
+                REQUIRE(!ejecutado);
+                elCoordinador->ejecutar();
+                REQUIRE(ejecutado);
+            }
+        }
+    }
+}
