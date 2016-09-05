@@ -33,7 +33,7 @@ private:
 };
 
 Hilo::Hilo() {
-    _cola = new Cola<Codigo*>();
+    _cola = new Lista<Codigo*>();
 }
 
 template<typename C>
@@ -48,7 +48,7 @@ void Hilo::ejecutar() {
         _cola->eliminarPrimero();
         _colaEnEspera = _cola;
 
-        _cola = new Cola<Codigo*>();
+        _cola = new Lista<Codigo*>();
         aEjecutar->ejecutar();
         _cola->transferirAlInicioDe(_colaEnEspera);
         delete _cola;

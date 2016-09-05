@@ -1,7 +1,7 @@
 #ifndef HILO_H
 #define HILO_H
 
-#include "Cola.h"
+#include "Lista.h"
 #include "TiempoActual.h"
 
 typedef void (*funcion)();
@@ -18,8 +18,8 @@ public:
 
     void demorarUltimoCodigoEn(milisegundos tiempoDeDemora);
 private:
-    Cola<Codigo*>* _cola;
-    Cola<Codigo*>* _colaEnEspera;
+    Lista<Codigo*>* _cola;
+    Lista<Codigo*>* _colaEnEspera;
 };
 
 #include "Hilo.cpp"
