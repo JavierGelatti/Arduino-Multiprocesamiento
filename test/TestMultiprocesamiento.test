@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "../Multiprocesamiento.h"
+#include "../src/Multiprocesamiento.h"
 #include "StubTiempoActual.h"
 
 char _log[20];

@@ -1,0 +1,4 @@
+esperar	KEYWORD2
+nuevoHilo	KEYWORD1
+ejecutar	KEYWORD2
+ejecutarHilos	KEYWORD1

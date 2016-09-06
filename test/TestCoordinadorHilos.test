@@ -1,9 +1,9 @@
 #include "catch.hpp"
 
 #include "StubTiempoActual.h"
-#include "../CoordinadorHilos.h"
-#include "../Hilo.h"
-#include "../Lambda.h"
+#include "../src/CoordinadorHilos.h"
+#include "../src/Hilo.h"
+#include "../src/Lambda.h"
 
 SCENARIO("creacion de hilos", "[coordinador_hilos]") {
     GIVEN("un coordinador de hilos nuevo") {

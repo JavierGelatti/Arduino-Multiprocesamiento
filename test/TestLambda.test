@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include "../Lambda.h"
+#include "../src/Lambda.h"
 
 SCENARIO("fun with lambdas", "[lambda]") {
     GIVEN("un closure nativo que multiplica por una variable que vale 3") {

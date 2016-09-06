@@ -1,8 +1,8 @@
 #include "catch.hpp"
 
 #include "StubTiempoActual.h"
-#include "../Hilo.h"
-#include "../Lambda.h"
+#include "../src/Hilo.h"
+#include "../src/Lambda.h"
 
 bool ejecutado;
 SCENARIO("ejecución de código", "[multiprocesamiento]") {

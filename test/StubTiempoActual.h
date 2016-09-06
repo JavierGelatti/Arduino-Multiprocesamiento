@@ -1,7 +1,7 @@
 #ifndef STUBTIEMPOACTUAL_H
 #define STUBTIEMPOACTUAL_H
 
-#include "../TiempoActual.h"
+#include "../src/TiempoActual.h"
 
 void milisegundosActuales(milisegundos ms);
 
