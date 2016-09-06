@@ -1,0 +1,46 @@
+#include "catch.hpp"
+
+#include "../Multiprocesamiento.h"
+#include "../Lambda.h"
+#include "StubTiempoActual.h"
+
+SCENARIO("multiprocesamiento", "[multiprocesamiento]") {
+    GIVEN("hilos planificados") {
+        char log[10];
+        int i = 0;
+
+        esperar(20);
+        ejecutar(log[i++] = 'a'); // se ejecuta en 20
+        esperar(15);
+        ejecutar(log[i++] = 'b'); // se ejecuta en 35
+
+        nuevoHilo();
+        ejecutar(log[i++] = 'c'); // se ejecuta en 0
+        esperar(10);
+        ejecutar(log[i++] = 'd'); // se ejecuta en 10 (1)
+
+        nuevoHilo();
+        esperar(5);
+        ejecutar(log[i++] = 'e'); // se ejecuta en 5
+        esperar(5);
+        ejecutar(log[i++] = 'f'); // se ejecuta en 10 (2)
+        ejecutar(log[i++] = 'g'); // se ejecuta en 10 (3)
+
+        WHEN("se ejecuta") {
+            for (int j = 0; j < 40; j++) {
+                milisegundosActuales(j);
+                ejecutarHilos();
+            }
+                log[9] = '\0';
+            THEN("se ejecuta en orden correcto") {
+                REQUIRE(log[0] == 'c');
+                REQUIRE(log[1] == 'e');
+                REQUIRE(log[2] == 'd');
+                REQUIRE(log[3] == 'f');
+                REQUIRE(log[4] == 'g');
+                REQUIRE(log[5] == 'a');
+                REQUIRE(log[6] == 'b');
+            }
+        }
+    }
+}
