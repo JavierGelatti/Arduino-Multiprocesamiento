@@ -1,45 +1,95 @@
 #include "catch.hpp"
 
 #include "../Multiprocesamiento.h"
-#include "../Lambda.h"
 #include "StubTiempoActual.h"
+
+char _log[20];
+int i = 0;
 
 SCENARIO("multiprocesamiento", "[multiprocesamiento]") {
     GIVEN("hilos planificados") {
-        char log[10];
-        int i = 0;
+        i = 0;
 
         esperar(20);
-        ejecutar(log[i++] = 'a'); // se ejecuta en 20
+        ejecutar(_log[i++] = 'a'); // se ejecuta en 20
         esperar(15);
-        ejecutar(log[i++] = 'b'); // se ejecuta en 35
+        ejecutar(_log[i++] = 'b'); // se ejecuta en 35
 
         nuevoHilo();
-        ejecutar(log[i++] = 'c'); // se ejecuta en 0
+        ejecutar(_log[i++] = 'c'); // se ejecuta en 0
         esperar(10);
-        ejecutar(log[i++] = 'd'); // se ejecuta en 10 (1)
+        ejecutar(_log[i++] = 'd'); // se ejecuta en 10 (1)
 
         nuevoHilo();
         esperar(5);
-        ejecutar(log[i++] = 'e'); // se ejecuta en 5
+        ejecutar(_log[i++] = 'e'); // se ejecuta en 5
         esperar(5);
-        ejecutar(log[i++] = 'f'); // se ejecuta en 10 (2)
-        ejecutar(log[i++] = 'g'); // se ejecuta en 10 (3)
+        ejecutar(_log[i++] = 'f'); // se ejecuta en 10 (2)
+        ejecutar(_log[i++] = 'g'); // se ejecuta en 10 (3)
 
         WHEN("se ejecuta") {
             for (int j = 0; j < 40; j++) {
                 milisegundosActuales(j);
                 ejecutarHilos();
             }
-                log[9] = '\0';
             THEN("se ejecuta en orden correcto") {
-                REQUIRE(log[0] == 'c');
-                REQUIRE(log[1] == 'e');
-                REQUIRE(log[2] == 'd');
-                REQUIRE(log[3] == 'f');
-                REQUIRE(log[4] == 'g');
-                REQUIRE(log[5] == 'a');
-                REQUIRE(log[6] == 'b');
+                REQUIRE(_log[0] == 'c');
+                REQUIRE(_log[1] == 'e');
+                REQUIRE(_log[2] == 'd');
+                REQUIRE(_log[3] == 'f');
+                REQUIRE(_log[4] == 'g');
+                REQUIRE(_log[5] == 'a');
+                REQUIRE(_log[6] == 'b');
+            }
+        }
+    }
+    GIVEN("hilos planificados con codigo anidado") {
+        i = 0;
+
+        esperar(20);
+        ejecutar( // se ejecuta en 20 (1)
+            _log[i++] = 'a';
+            ejecutar(_log[i++] = '1'); // se ejecuta en 20 (2)
+            esperar(5);
+            ejecutar(_log[i++] = '2'); // se ejecuta en 25
+        );
+        esperar(15);
+        ejecutar(_log[i++] = 'b'); // se ejecuta en 45
+
+        nuevoHilo();
+        ejecutar(_log[i++] = 'c'); // se ejecuta en 0
+        esperar(10);
+        ejecutar(  // se ejecuta en 10 (1) -
+            _log[i++] = 'd';
+            ejecutar(_log[i++] = '3'); // se ejecuta en 10 (3)
+            esperar(28);
+            ejecutar(_log[i++] = '4'); // se ejecuta en 38
+        );
+
+        nuevoHilo();
+        esperar(5);
+        ejecutar(_log[i++] = 'e'); // se ejecuta en 5
+        esperar(5);
+        ejecutar(_log[i++] = 'f'); // se ejecuta en 10 (2)
+        ejecutar(_log[i++] = 'g'); // se ejecuta en 10 (4)
+
+        WHEN("se ejecuta") {
+            for (int j = 0; j < 45; j++) {
+                milisegundosActuales(j);
+                ejecutarHilos();
+            }
+            THEN("se ejecuta en orden correcto") {
+                REQUIRE(_log[0] == 'c');
+                REQUIRE(_log[1] == 'e');
+                REQUIRE(_log[2] == 'd');
+                REQUIRE(_log[3] == 'f');
+                REQUIRE(_log[4] == '3');
+                REQUIRE(_log[5] == 'g');
+                REQUIRE(_log[6] == 'a');
+                REQUIRE(_log[7] == '1');
+                REQUIRE(_log[8] == '2');
+                REQUIRE(_log[9] == '4');
+                REQUIRE(_log[10]== 'b');
             }
         }
     }

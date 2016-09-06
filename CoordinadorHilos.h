@@ -14,14 +14,17 @@ public:
     void demorarSiguienteCodigoEn(milisegundos tiempoDeDemora);
 private:
     Lista<Hilo*>* _hilos;
+    Hilo* _hiloActual;
+    
+    void _crearHilo();
 };
 
 template<typename C>
 void CoordinadorHilos::agregarCodigo(C &codigoAEjecutar) {
     if (_hilos->estaVacia())
-        _hilos->agregar(new Hilo());
+        _crearHilo();
 
-    _hilos->ultimoElemento()->agregarCodigo(codigoAEjecutar);
+    _hiloActual->agregarCodigo(codigoAEjecutar);
 }
 
 #endif

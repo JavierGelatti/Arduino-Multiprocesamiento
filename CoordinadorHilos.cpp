@@ -6,18 +6,24 @@
 
 CoordinadorHilos::CoordinadorHilos() {
     _hilos = new Lista<Hilo*>();
-    _hilos->agregar(new Hilo());
+    _crearHilo();
+}
+
+void CoordinadorHilos::_crearHilo() {
+    Hilo* elHiloNuevo = new Hilo();
+    _hiloActual = elHiloNuevo;
+    _hilos->agregar(elHiloNuevo);
 }
 
 void CoordinadorHilos::ejecutar() {
-    _hilos->forEach(lambda(Hilo* h, h->ejecutar()));
+    auto ejecutarHilo = closure(Hilo* h, _hiloActual = h; h->ejecutar());
+    _hilos->forEach(ejecutarHilo);
     _hilos->filtrar(lambda(Hilo* h, return !h->terminoDeEjecutarse()));
 }
 
 Hilo* CoordinadorHilos::crearHilo() {
-    Hilo* elHiloNuevo = new Hilo();
-    _hilos->agregar(elHiloNuevo);
-    return elHiloNuevo;
+    _crearHilo();
+    return _hiloActual;
 }
 
 int CoordinadorHilos::cantidadDeHilos() {
@@ -25,7 +31,10 @@ int CoordinadorHilos::cantidadDeHilos() {
 }
 
 void CoordinadorHilos::demorarSiguienteCodigoEn(milisegundos tiempoDeDemora) {
-    _hilos->ultimoElemento()->demorarSiguienteCodigoEn(tiempoDeDemora);
+    if (_hilos->estaVacia())
+        _crearHilo();
+ 
+    _hiloActual->demorarSiguienteCodigoEn(tiempoDeDemora);
 }
 
 #endif

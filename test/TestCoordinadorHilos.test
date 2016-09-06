@@ -60,6 +60,17 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
             THEN("el hilo vacío se elimina") {
                 REQUIRE(elCoordinador->cantidadDeHilos() == 0);
             }
+
+            WHEN("se intenta registrar una demora") {
+                elCoordinador->demorarSiguienteCodigoEn(10);
+                
+                THEN("no hay errores") {
+                    REQUIRE(true);
+                }
+                THEN("se crea un nuevo hilo") {
+                    REQUIRE(elCoordinador->cantidadDeHilos() == 1);
+                }
+            }
         }
     }
     GIVEN("un coordinador de hilos sin hilos") {
@@ -168,6 +179,127 @@ SCENARIO("creacion de hilos", "[coordinador_hilos]") {
                     }
                 }
             } 
+        }
+    }
+}
+SCENARIO("codigo anidado", "[coordinador_hilos]") {
+    GIVEN("un coordinador de hilos") {
+        CoordinadorHilos* elCoordinador = new CoordinadorHilos();
+
+        WHEN("se le agregan comandos anidados") {
+            int i = 0;
+            char secuencia[7];
+
+            auto codigo1_1 = comando(secuencia[i++] = '1');
+            auto codigo1_2 = comando(secuencia[i++] = '2');
+            auto codigo1 = comando(
+                secuencia[i++] = 'a';
+                elCoordinador->agregarCodigo(codigo1_1);
+                elCoordinador->agregarCodigo(codigo1_2);
+            );
+            auto codigo2 = comando(secuencia[i++] = 'b');
+
+            elCoordinador->agregarCodigo(codigo1);
+            elCoordinador->agregarCodigo(codigo2);
+
+            WHEN("se ejecuta el coordinador") {
+                for (int j = 0; j < 4; j++) {
+                    elCoordinador->ejecutar();
+                }
+                
+                THEN("el código anidado se ejecutó en el orden correcto") {
+                    char esperado[6] = "a12b";
+                    for (int j = 0; j < 4; j++) {
+                        REQUIRE(secuencia[j] == esperado[j]);
+                    }
+                }
+            }
+        }
+        WHEN("se le agregan comandos anidados en hilos diferentes") {
+            int i = 0;
+            char secuencia[7];
+
+            auto codigo1_1 = comando(secuencia[i++] = '1');
+            auto codigo1_2 = comando(secuencia[i++] = '2');
+            auto codigo1 = comando(
+                secuencia[i++] = 'a';
+                elCoordinador->agregarCodigo(codigo1_1);
+                elCoordinador->agregarCodigo(codigo1_2);
+            );
+            auto codigo2 = comando(secuencia[i++] = 'b');
+            elCoordinador->agregarCodigo(codigo1);
+            elCoordinador->agregarCodigo(codigo2);
+
+            auto codigo3_1 = comando(secuencia[i++] = '3');
+            auto codigo3_2 = comando(secuencia[i++] = '4');
+            auto codigo3 = comando(
+                secuencia[i++] = 'c';
+                elCoordinador->agregarCodigo(codigo3_1);
+                elCoordinador->agregarCodigo(codigo3_2);
+            );
+            auto codigo4 = comando(secuencia[i++] = 'd');
+            
+            elCoordinador->crearHilo();
+            elCoordinador->agregarCodigo(codigo3);
+            elCoordinador->agregarCodigo(codigo4);
+
+            WHEN("se ejecuta el coordinador") {
+                for (int j = 0; j < 8; j++) {
+                    elCoordinador->ejecutar();
+                }
+                
+                THEN("el código anidado se ejecutó en el orden correcto") {
+                    char esperado[9] = "ac1324bd";
+                    for (int j = 0; j < 8; j++) {
+                        REQUIRE(secuencia[j] == esperado[j]);
+                    }
+                }
+            }
+        }
+        WHEN("se agregan demoras en comandos anidados en hilos diferentes") {
+            int i = 0;
+            char secuencia[7];
+
+            auto codigo1_1 = comando(secuencia[i++] = '1');
+            auto codigo1_2 = comando(secuencia[i++] = '2');
+            auto codigo1 = comando(
+                secuencia[i++] = 'a';
+                elCoordinador->demorarSiguienteCodigoEn(15);
+                elCoordinador->agregarCodigo(codigo1_1);
+                elCoordinador->demorarSiguienteCodigoEn(5);
+                elCoordinador->agregarCodigo(codigo1_2);
+            );
+            auto codigo2 = comando(secuencia[i++] = 'b');
+            elCoordinador->agregarCodigo(codigo1);
+            elCoordinador->agregarCodigo(codigo2);
+
+            auto codigo3_1 = comando(secuencia[i++] = '3');
+            auto codigo3_2 = comando(secuencia[i++] = '4');
+            auto codigo3 = comando(
+                secuencia[i++] = 'c';
+                elCoordinador->agregarCodigo(codigo3_1);
+                elCoordinador->demorarSiguienteCodigoEn(10);
+                elCoordinador->agregarCodigo(codigo3_2);
+            );
+            auto codigo4 = comando(secuencia[i++] = 'd');
+            
+            elCoordinador->crearHilo();
+            elCoordinador->agregarCodigo(codigo3);
+            elCoordinador->agregarCodigo(codigo4);
+
+            WHEN("se ejecuta el coordinador") {
+                for (int j = 0; j < 25; j++) {
+                    milisegundosActuales(j);
+                    elCoordinador->ejecutar();
+                }
+                
+                THEN("el código anidado se ejecutó en el orden correcto") {
+                    char esperado[9] = "ac34d12b";
+                    for (int j = 0; j < 8; j++) {
+                        REQUIRE(secuencia[j] == esperado[j]);
+                    }
+                }
+            }
         }
     }
 }
