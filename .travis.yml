@@ -1,4 +1,7 @@
 compiler: g++
+
+before_script: g++ --version
+
 script:
 - cd test/
 - make
